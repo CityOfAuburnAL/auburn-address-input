@@ -1,0 +1,150 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
+
+<!--
+`auburn-address-input`
+Form Input for addresses within Auburn city.
+
+@demo demo/index.html
+-->
+
+<dom-module id="auburn-address-input">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <iron-ajax  id="service"
+                url="https://gis.auburnalabama.org/public/rest/services/Main/Search/MapServer/0/query"
+                params='{ "returnGeometry" : false, "f" : "json" }'
+                handle-as="json"
+                on-response="_serviceResponse"
+                debounce-duration="50"></iron-ajax>
+    
+    <slot name="query">
+      <input name="fullAddress" type="search" list="addressCandidates" autocomplete="address-line1" autofocus />
+    </slot>
+
+    <slot name="result">
+      <datalist id="addressCandidates"></datalist>
+    </slot>
+
+  </template>
+
+  <script>
+    class AuburnAddressInput extends Polymer.Element {
+      static get is() { return 'auburn-address-input'; }
+      static get properties() {
+        return {
+          /**
+           * Sets/Gets the minimum length for the searchTerm before it's sent to the service
+           */
+          queryMinLength: {
+            type: Number,
+            value: function() { return 3; }
+          },
+          /**
+           * Sets/Gets the maximum results to show as address candidates
+           * Result sets above this maximum will be thrown out - Set to 0 for infinite
+           */
+          resultMaxLength: {
+            type: Number,
+            value: function() { return 15; }
+          },
+          /**
+           * Stores previously queried search term results
+           * //TODO - replace cache with indexDB
+           */
+          cache: {
+            type: Array,
+            value: function() { return []; }
+          }
+        };
+      }
+      /**
+       * Fired when element is ready (Polymer specific)
+       * Stores input variable and attaches keydown listner
+       */
+      ready() {
+        super.ready();
+
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          this.input = this.querySelector('input') //this is if an input is provided
+                          || this.shadowRoot.querySelector('slot[name="query"]').querySelector('input');//this is if the slot default input is utilized
+          this.input.addEventListener('keyup', this.inputChange.bind(this));
+
+          //similiarly, store datalist element
+          this.list = this.querySelector('datalist')
+                          || this.shadowRoot.querySelector('slot[name="result"]').querySelector('datalist');
+        });
+      }
+      /**
+       * Handles keydown events from input
+       */
+      inputChange(event) {
+        if (event.keyCode == 13) return;//do nothing on 'Enter'
+
+        //check cache
+        let searchTerm = this.input.value;
+        let cached = null;
+        if (cached = this._getCache(searchTerm)) 
+          return this.showResult(cached);
+
+        //makee query
+        this.findAddressCandidates(searchTerm);
+      }
+      /**
+       * Makes service request for user entered searchTerm
+       */
+      findAddressCandidates(searchTerm) {
+        if (searchTerm.length < this.queryMinLength) return;
+        
+        this.$.service.params.where = `LifecycleStatus='ACTIVE' AND FullAddress LIKE '%${searchTerm.replace(/ /gi, '%')}%'`;
+        this.$.service.params.term = searchTerm;
+        this.$.service.generateRequest();
+      }
+      /**
+       * Shows address candidates
+       * Expects features object from GIS query result.features
+       */
+      showAddressCandidates(features) {
+        if (!features) {
+          this.list.setAttribute('hidden', true);
+          this.list.innerHTML = '';
+          return;
+        }
+
+        this.list.removeAttribute('hidden');
+        let options = features.map(feature => {
+            return `<option value="${feature.attributes.FullAddress}"></option>`;
+          }).join('');
+        this.list.innerHTML = options;
+      }
+      /**
+       * Handles result from GIS service called to findAddressCandidates
+       * Disregards responses with no results or result sets above resultMaxLength (if set)
+       */
+      _serviceResponse(event) {
+        let response = event.detail.response;
+        if ((!response.features || !response.features.length) 
+            || (this.resultMaxLength && this.resultMaxLength < response.features.length)) return;
+        //attempt to cache
+        if (event.target.params)
+          this._setCache(event.target.params.term);
+        
+        this.showAddressCandidates(response.features);
+      }
+      _getCache(term) {
+        return this.cache[term];
+      }
+      _setCache(term, resultSet) {
+        this.cache[term] = resultSet;
+      }
+      //todo - polyfill datelist for Safari..  Handle down arrow? tab?
+    }
+
+    window.customElements.define(AuburnAddressInput.is, AuburnAddressInput);
+  </script>
+</dom-module>

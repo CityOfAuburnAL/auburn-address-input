@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>auburn-address-input demo</title>
+
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../bower_components/iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../bower_components/iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../auburn-address-input.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+      auburn-address-input {
+        display: inline-block;
+        width: 33%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="vertical-section-container centered">
+      <h3>Basic auburn-address-input demo</h3>
+      <demo-snippet>
+        <template>
+          <auburn-address-input></auburn-address-input>
+        </template>
+      </demo-snippet>
+      <h3>Custom auburn-address-input demo</h3>
+      <demo-snippet>
+        <template>
+          <auburn-address-input query-min-length="3" result-max-length="15">
+            <input slot="query" name="fullAddress" type="text" list="addressCandidates" autocomplete="address-line1" autofocus />
+            <datalist id="addressCandidates" slot="result"></datalist>
+          </auburn-address-input>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
+</html>
