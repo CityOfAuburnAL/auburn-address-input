@@ -17,6 +17,12 @@ On modern browsers you can view the demo by serving the /demo/index.html page. F
 
 //TODO - Testing Not Implemented!!!
 
+## Known Bugs
+
+1. Using the component with no configuration "basic demo" only works if it's the only auburn-address-input on the webpage. Appears to be a render bug (tested in Chrome 56).
+2. Datalist are not supported in Safari
+3. Browsers do not show complete datalist. Therefore the browser may be filtering out some of the options.
+
 # Polymer Projects
 
 ## Install the Polymer-CLI

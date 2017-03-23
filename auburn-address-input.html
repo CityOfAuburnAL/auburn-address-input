@@ -17,8 +17,8 @@ Form Input for addresses within Auburn city.
     </style>
 
     <iron-ajax  id="service"
-                url="https://gis.auburnalabama.org/public/rest/services/Main/Search/MapServer/0/query"
-                params='{ "returnGeometry" : false, "f" : "json" }'
+                url="https://gis.auburnalabama.org/public/rest/services/Tools/AddressPointLocator/GeocodeServer/findAddressCandidates"
+                params='{ "f" : "json" }'
                 handle-as="json"
                 on-response="_serviceResponse"
                 debounce-duration="50"></iron-ajax>
@@ -101,7 +101,7 @@ Form Input for addresses within Auburn city.
       findAddressCandidates(searchTerm) {
         if (searchTerm.length < this.queryMinLength) return;
         
-        this.$.service.params.where = `LifecycleStatus='ACTIVE' AND FullAddress LIKE '%${searchTerm.replace(/ /gi, '%')}%'`;
+        this.$.service.params['Single Line Input'] = searchTerm;
         this.$.service.params.term = searchTerm;
         this.$.service.generateRequest();
       }
@@ -109,16 +109,16 @@ Form Input for addresses within Auburn city.
        * Shows address candidates
        * Expects features object from GIS query result.features
        */
-      showAddressCandidates(features) {
-        if (!features) {
+      showAddressCandidates(candidates) {
+        if (!candidates) {
           this.list.setAttribute('hidden', true);
           this.list.innerHTML = '';
           return;
         }
 
         this.list.removeAttribute('hidden');
-        let options = features.map(feature => {
-            return `<option value="${feature.attributes.FullAddress}"></option>`;
+        let options = candidates.map(candidate => {
+            return `<option value="${candidate.address}"></option>`;
           }).join('');
         this.list.innerHTML = options;
       }
@@ -128,13 +128,13 @@ Form Input for addresses within Auburn city.
        */
       _serviceResponse(event) {
         let response = event.detail.response;
-        if ((!response.features || !response.features.length) 
-            || (this.resultMaxLength && this.resultMaxLength < response.features.length)) return;
+        if ((!response.candidates || !response.candidates.length) 
+            || (this.resultMaxLength && this.resultMaxLength < response.candidates.length)) return;
         //attempt to cache
         if (event.target.params)
           this._setCache(event.target.params.term);
         
-        this.showAddressCandidates(response.features);
+        this.showAddressCandidates(response.candidates);
       }
       _getCache(term) {
         return this.cache[term];
