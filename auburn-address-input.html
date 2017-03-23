@@ -16,11 +16,17 @@ Form Input for addresses within Auburn city.
       }
     </style>
 
-    <iron-ajax  id="service"
+    <iron-ajax  id="fuzzyService"
                 url="https://gis.auburnalabama.org/public/rest/services/Tools/AddressPointLocator/GeocodeServer/findAddressCandidates"
                 params='{ "f" : "json" }'
                 handle-as="json"
-                on-response="_serviceResponse"
+                on-response="_goodServiceResponse"
+                debounce-duration="50"></iron-ajax>
+    <iron-ajax  id="looseService"
+                url="https://gis.auburnalabama.org/public/rest/services/Main/Search/MapServer/0/query"
+                params='{ "f" : "json" }'
+                handle-as="json"
+                on-response="_easyServiceResponse"
                 debounce-duration="50"></iron-ajax>
     
     <slot name="query">
@@ -90,7 +96,7 @@ Form Input for addresses within Auburn city.
         let searchTerm = this.input.value;
         let cached = null;
         if (cached = this._getCache(searchTerm)) 
-          return this.showResult(cached);
+          return this.showAddressCandidates(cached);
 
         //makee query
         this.findAddressCandidates(searchTerm);
@@ -101,40 +107,65 @@ Form Input for addresses within Auburn city.
       findAddressCandidates(searchTerm) {
         if (searchTerm.length < this.queryMinLength) return;
         
-        this.$.service.params['Single Line Input'] = searchTerm;
-        this.$.service.params.term = searchTerm;
-        this.$.service.generateRequest();
+        this.$.looseService.params.where = `Lifecyclestatus='ACTIVE' AND FullAddress LIKE '${searchTerm.replace(/ /gi, '%')}%'`;
+        this.$.looseService.params.term = searchTerm;
+        this.$.looseService.generateRequest();
+
+        this.$.fuzzyService.params['Single Line Input'] = searchTerm;
+        this.$.fuzzyService.params.term = searchTerm;
+        this.$.fuzzyService.generateRequest();
       }
       /**
        * Shows address candidates
-       * Expects features object from GIS query result.features
+       * Expects cadidate object from GIS findAddressCandidates result.candidates
        */
       showAddressCandidates(candidates) {
+        console.log(candidates);
         if (!candidates) {
-          this.list.setAttribute('hidden', true);
-          this.list.innerHTML = '';
+          //this.list.setAttribute('hidden', true);
+          //this.list.innerHTML = '';
           return;
         }
-
         this.list.removeAttribute('hidden');
         let options = candidates.map(candidate => {
             return `<option value="${candidate.address}"></option>`;
           }).join('');
         this.list.innerHTML = options;
       }
+
       /**
        * Handles result from GIS service called to findAddressCandidates
        * Disregards responses with no results or result sets above resultMaxLength (if set)
        */
-      _serviceResponse(event) {
+      _goodServiceResponse(event) {
         let response = event.detail.response;
         if ((!response.candidates || !response.candidates.length) 
             || (this.resultMaxLength && this.resultMaxLength < response.candidates.length)) return;
         //attempt to cache
         if (event.target.params)
-          this._setCache(event.target.params.term);
+          this._setCache(event.target.params.term, response.candidates);
         
         this.showAddressCandidates(response.candidates);
+      }
+      /**
+       * Handles result from GIS service called to findAddressCandidates
+       * Disregards responses with no results or result sets above resultMaxLength (if set)
+       */
+      _easyServiceResponse(event) {
+        let response = event.detail.response;
+        if ((!response.features || !response.features.length) 
+            || (this.resultMaxLength && this.resultMaxLength < response.features.length)) return;
+        //translate features to addressCandidate structure for consistency
+        let candidates = response.features.map(feature => {
+            return { address : feature.attributes.FullAddress }
+          });
+        //attempt to cache - but this service is less strict so lets not override anything by the good service
+        let goodResult = null;
+        if (event.target.params && !(goodResult = this._getCache(event.target.params.term)))
+          this._setCache(event.target.params.term, candidates);
+        
+        if (!goodResult)
+          this.showAddressCandidates(candidates);
       }
       _getCache(term) {
         return this.cache[term];
