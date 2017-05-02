@@ -9,7 +9,7 @@ Form Input for addresses within Auburn city.
 -->
 
 <dom-module id="auburn-address-input">
-  <template>
+    <template>
     <style>
       :host {
         display: block;
@@ -30,7 +30,7 @@ Form Input for addresses within Auburn city.
                 debounce-duration="50"></iron-ajax>
     
     <slot name="query">
-      <input name="fullAddress" type="search" list="addressCandidates" autocomplete="address-line1" autofocus />
+      <input name="fullAddress" type="search" list="addressCandidates" autocomplete="address-line1" />
     </slot>
 
     <slot name="result">
@@ -39,143 +39,154 @@ Form Input for addresses within Auburn city.
 
   </template>
 
-  <script>
-    class AuburnAddressInput extends Polymer.Element {
-      static get is() { return 'auburn-address-input'; }
-      static get properties() {
-        return {
-          /**
-           * Sets/Gets the minimum length for the searchTerm before it's sent to the service
-           */
-          queryMinLength: {
-            type: Number,
-            value: function() { return 3; }
-          },
-          /**
-           * Sets/Gets the maximum results to show as address candidates
-           * Result sets above this maximum will be thrown out - Set to 0 for infinite
-           */
-          resultMaxLength: {
-            type: Number,
-            value: function() { return 15; }
-          },
-          /**
-           * Stores previously queried search term results
-           * //TODO - replace cache with indexDB
-           */
-          cache: {
-            type: Array,
-            value: function() { return []; }
-          }
-        };
-      }
-      /**
-       * Fired when element is ready (Polymer specific)
-       * Stores input variable and attaches keydown listner
-       */
-      ready() {
-        super.ready();
+    <script>
+        class AuburnAddressInput extends Polymer.Element {
+            static get is() {
+                return 'auburn-address-input';
+            }
+            static get properties() {
+                    return {
+                        /**
+                         * Sets/Gets the minimum length for the searchTerm before it's sent to the service
+                         */
+                        queryMinLength: {
+                            type: Number,
+                            value: function() {
+                                return 3;
+                            }
+                        },
+                        /**
+                         * Sets/Gets the maximum results to show as address candidates
+                         * Result sets above this maximum will be thrown out - Set to 0 for infinite
+                         */
+                        resultMaxLength: {
+                            type: Number,
+                            value: function() {
+                                return 15;
+                            }
+                        },
+                        /**
+                         * Stores previously queried search term results
+                         * //TODO - replace cache with indexDB
+                         */
+                        cache: {
+                            type: Array,
+                            value: function() {
+                                return [];
+                            }
+                        }
+                    };
+                }
+                /**
+                 * Fired when element is ready (Polymer specific)
+                 * Stores input variable and attaches keydown listner
+                 */
+            ready() {
+                    super.ready();
 
-        Polymer.RenderStatus.afterNextRender(this, function() {
-          this.input = this.querySelector('input') //this is if an input is provided
-                          || this.shadowRoot.querySelector('slot[name="query"]').querySelector('input');//this is if the slot default input is utilized
-          this.input.addEventListener('keyup', this.inputChange.bind(this));
+                    Polymer.RenderStatus.afterNextRender(this, function() {
+                        this.input = this.querySelector('input') //this is if an input is provided
+                            ||
+                            this.shadowRoot.querySelector('slot[name="query"]').querySelector('input'); //this is if the slot default input is utilized
+                        this.input.addEventListener('keyup', this.inputChange.bind(this));
 
-          //similiarly, store datalist element
-          this.list = this.querySelector('datalist')
-                          || this.shadowRoot.querySelector('slot[name="result"]').querySelector('datalist');
-        });
-      }
-      /**
-       * Handles keydown events from input
-       */
-      inputChange(event) {
-        if (event.keyCode == 13) return;//do nothing on 'Enter'
+                        //similiarly, store datalist element
+                        this.list = this.querySelector('datalist') ||
+                            this.shadowRoot.querySelector('slot[name="result"]').querySelector('datalist');
+                    });
+                }
+                /**
+                 * Handles keydown events from input
+                 */
+            inputChange(event) {
+                    if (event.keyCode == 13) return; //do nothing on 'Enter'
 
-        //check cache
-        let searchTerm = this.input.value;
-        let cached = null;
-        if (cached = this._getCache(searchTerm)) 
-          return this.showAddressCandidates(cached);
+                    //check cache
+                    let searchTerm = this.input.value;
+                    let cached = null;
+                    if (cached = this._getCache(searchTerm))
+                        return this.showAddressCandidates(cached);
 
-        //makee query
-        this.findAddressCandidates(searchTerm);
-      }
-      /**
-       * Makes service request for user entered searchTerm
-       */
-      findAddressCandidates(searchTerm) {
-        if (searchTerm.length < this.queryMinLength) return;
-        
-        this.$.looseService.params.where = `Lifecyclestatus='ACTIVE' AND FullAddress LIKE '${searchTerm.replace(/ /gi, '%')}%'`;
-        this.$.looseService.params.term = searchTerm;
-        this.$.looseService.generateRequest();
+                    //makee query
+                    this.findAddressCandidates(searchTerm);
+                }
+                /**
+                 * Makes service request for user entered searchTerm
+                 */
+            findAddressCandidates(searchTerm) {
+                    if (searchTerm.length < this.queryMinLength) return;
 
-        this.$.fuzzyService.params['Single Line Input'] = searchTerm;
-        this.$.fuzzyService.params.term = searchTerm;
-        this.$.fuzzyService.generateRequest();
-      }
-      /**
-       * Shows address candidates
-       * Expects cadidate object from GIS findAddressCandidates result.candidates
-       */
-      showAddressCandidates(candidates) {
-        console.log(candidates);
-        if (!candidates) {
-          //this.list.setAttribute('hidden', true);
-          //this.list.innerHTML = '';
-          return;
+                    this.$.looseService.params.where = `Lifecyclestatus='ACTIVE' AND FullAddress LIKE '${searchTerm.replace(/ /gi, '%')}%'`;
+                    this.$.looseService.params.term = searchTerm;
+                    this.$.looseService.generateRequest();
+
+                    this.$.fuzzyService.params['Single Line Input'] = searchTerm;
+                    this.$.fuzzyService.params.term = searchTerm;
+                    this.$.fuzzyService.generateRequest();
+                }
+                /**
+                 * Shows address candidates
+                 * Expects cadidate object from GIS findAddressCandidates result.candidates
+                 */
+            showAddressCandidates(candidates) {
+                console.log(candidates);
+                if (!candidates) {
+                    //this.list.setAttribute('hidden', true);
+                    //this.list.innerHTML = '';
+                    return;
+                }
+                this.list.removeAttribute('hidden');
+                let options = candidates.map(candidate => {
+                    return `<option value="${candidate.address}"></option>`;
+                }).join('');
+                this.list.innerHTML = options;
+            }
+
+            /**
+             * Handles result from GIS service called to findAddressCandidates
+             * Disregards responses with no results or result sets above resultMaxLength (if set)
+             */
+            _goodServiceResponse(event) {
+                    let response = event.detail.response;
+                    if ((!response.candidates || !response.candidates.length) ||
+                        (this.resultMaxLength && this.resultMaxLength < response.candidates.length)) return;
+                    //attempt to cache
+                    if (event.target.params)
+                        this._setCache(event.target.params.term, response.candidates);
+
+                    this.showAddressCandidates(response.candidates);
+                }
+                /**
+                 * Handles result from GIS service called to findAddressCandidates
+                 * Disregards responses with no results or result sets above resultMaxLength (if set)
+                 */
+            _easyServiceResponse(event) {
+                let response = event.detail.response;
+                if ((!response.features || !response.features.length) ||
+                    (this.resultMaxLength && this.resultMaxLength < response.features.length)) return;
+                //translate features to addressCandidate structure for consistency
+                let candidates = response.features.map(feature => {
+                    return {
+                        address: feature.attributes.FullAddress
+                    }
+                });
+                //attempt to cache - but this service is less strict so lets not override anything by the good service
+                let goodResult = null;
+                if (event.target.params && !(goodResult = this._getCache(event.target.params.term)))
+                    this._setCache(event.target.params.term, candidates);
+
+                if (!goodResult)
+                    this.showAddressCandidates(candidates);
+            }
+            _getCache(term) {
+                return this.cache[term];
+            }
+            _setCache(term, resultSet) {
+                    this.cache[term] = resultSet;
+                }
+                //todo - polyfill datelist for Safari..  Handle down arrow? tab?
         }
-        this.list.removeAttribute('hidden');
-        let options = candidates.map(candidate => {
-            return `<option value="${candidate.address}"></option>`;
-          }).join('');
-        this.list.innerHTML = options;
-      }
 
-      /**
-       * Handles result from GIS service called to findAddressCandidates
-       * Disregards responses with no results or result sets above resultMaxLength (if set)
-       */
-      _goodServiceResponse(event) {
-        let response = event.detail.response;
-        if ((!response.candidates || !response.candidates.length) 
-            || (this.resultMaxLength && this.resultMaxLength < response.candidates.length)) return;
-        //attempt to cache
-        if (event.target.params)
-          this._setCache(event.target.params.term, response.candidates);
-        
-        this.showAddressCandidates(response.candidates);
-      }
-      /**
-       * Handles result from GIS service called to findAddressCandidates
-       * Disregards responses with no results or result sets above resultMaxLength (if set)
-       */
-      _easyServiceResponse(event) {
-        let response = event.detail.response;
-        if ((!response.features || !response.features.length) 
-            || (this.resultMaxLength && this.resultMaxLength < response.features.length)) return;
-        //translate features to addressCandidate structure for consistency
-        let candidates = response.features.map(feature => {
-            return { address : feature.attributes.FullAddress }
-          });
-        //attempt to cache - but this service is less strict so lets not override anything by the good service
-        let goodResult = null;
-        if (event.target.params && !(goodResult = this._getCache(event.target.params.term)))
-          this._setCache(event.target.params.term, candidates);
-        
-        if (!goodResult)
-          this.showAddressCandidates(candidates);
-      }
-      _getCache(term) {
-        return this.cache[term];
-      }
-      _setCache(term, resultSet) {
-        this.cache[term] = resultSet;
-      }
-      //todo - polyfill datelist for Safari..  Handle down arrow? tab?
-    }
-
-    window.customElements.define(AuburnAddressInput.is, AuburnAddressInput);
-  </script>
+        window.customElements.define(AuburnAddressInput.is, AuburnAddressInput);
+    </script>
 </dom-module>
