@@ -3,16 +3,19 @@
   "description": "Form Input for addresses within Auburn city.",
   "main": "auburn-address-input.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^2.0.0-rc.2"
+    "polymer": "Polymer/polymer#^2.0.0",
+    "iron-ajax": "PolymerElements/iron-ajax",
+    "paper-input": "PolymerElements/paper-input",
+    "paper-item": "PolymerElements/paper-item",
+    "paper-listbox": "PolymerElements/paper-listbox"
   },
   "devDependencies": {
-    "iron-component-page": "PolymerElements/iron-component-page#2.0-preview",
-    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#2.0-preview",
-    "iron-ajax": "PolymerElements/iron-ajax#2.0-preview",
-    "web-component-tester": "v6.0.0-prerelease.5",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0-rc.5"
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
+    "web-component-tester": "Polymer/web-component-tester#^6.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
+    "iron-pages": "PolymerElements/iron-pages"
   },
   "resolutions": {
-    "polymer": "^2.0.0-rc.2"
+    "polymer": "^2.0.0"
   }
 }

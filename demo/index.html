@@ -6,10 +6,10 @@
 
     <title>auburn-address-input demo</title>
 
-    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
-    <link rel="import" href="../bower_components/iron-demo-helpers/demo-pages-shared-styles.html">
-    <link rel="import" href="../bower_components/iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../auburn-address-input.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -24,18 +24,18 @@
       <h3>Basic auburn-address-input demo</h3>
       <demo-snippet>
         <template>
-          <auburn-address-input></auburn-address-input>
+          <auburn-address-input label="Service Address" required always-float-label></auburn-address-input>
         </template>
       </demo-snippet>
-      <h3>Custom auburn-address-input demo</h3>
+      <!--<h3>Custom auburn-address-input demo</h3>
       <demo-snippet>
         <template>
           <auburn-address-input query-min-length="3" result-max-length="15">
             <span slot="query"><input name="customAddress" type="text" list="customCandidates" autocomplete="address-line1" /></span>
-            <span slot="result"><datalist id="customCandidates"></datalist></span>
+            <span slot="result"><ul id="customCandidates"></ul></span>
           </auburn-address-input>
         </template>
-      </demo-snippet>
+      </demo-snippet>-->
     </div>
   </body>
 </html>
