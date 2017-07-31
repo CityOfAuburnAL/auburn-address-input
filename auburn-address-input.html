@@ -76,19 +76,13 @@ Form Input for addresses within Auburn city.
                 on-response="_easyServiceResponse"
                 debounce-duration="50"></iron-ajax>
     
-    <!--<slot name="query">
-      <input name="fullAddress" type="search" list="addressCandidates" autocomplete="address-line1" />
-    </slot>-->
+    <p>[[_selectedAddress]]</p>
     <paper-input id="paperInput" name="[[name]]" label="[[label]]" required="[[required]]" always-float-label="[[alwaysFloatLabel]]" type="search" tabindex="[[tabindex]]" on-blur="_handleBlur" on-focus="_handleFocus" on-value-changed="_handleQueryChanged"></paper-input>
     <paper-listbox id="paperList" selected="{{_selectedAddress}}" on-focus="_handleFocus" hidden>
         <template is="dom-repeat" items="[[candidates]]">
             <paper-item>[[item.address]]</paper-item>
         </template>
     </paper-listbox>
-
-    <slot name="result">
-        <ul id="addressCandidates"></ul>
-    </slot>
 
   </template>
 
@@ -150,20 +144,6 @@ Form Input for addresses within Auburn city.
                     Polymer.RenderStatus.afterNextRender(this, function() {
                         this.input = this.$.paperInput;
                         this.list = this.$.paperList;
-
-                        // this.input = this.querySelector('input') //this is if an input is provided
-                        //     ||
-                        //     this.shadowRoot.querySelector('slot[name="query"]').querySelector('input'); //this is if the slot default input is utilized
-                        // this.input.addEventListener('keyup', this.inputChange.bind(this));
-                        // this.input.addEventListener('keydown', this.inputMove.bind(this));
-                        // this.input.addEventListener('focusout', this.inputClose.bind(this));
-                        // if (this.hasAttribute('autofocus'))
-                        //     this.input.focus();
-
-                        // //similiarly, store datalist element
-                        // this.list = this.querySelector('ul') ||
-                        //     this.shadowRoot.querySelector('slot[name="result"]').querySelector('ul');
-                        // this.list.addEventListener('click', this.listTap.bind(this));
                     });
                 }
                 _handleQueryChanged(event) {
@@ -172,7 +152,6 @@ Form Input for addresses within Auburn city.
                     let cached = null;
                     if (cached = this._getCache(searchTerm))
                         return this._showCandidates(searchTerm, cached);
-                        //return this.showAddressCandidates(cached);
 
                     //make query
                     if ((!searchTerm)) {
@@ -182,7 +161,7 @@ Form Input for addresses within Auburn city.
                     this.findCandidates(searchTerm);
                 }
                 _handleSelectedChange(selected, old) {
-                    if (!selected && !old) {
+                    if (selected === '' && !old) {
                         return;
                     }
                     this.input.value = this.candidates[selected].address;
@@ -222,6 +201,7 @@ Form Input for addresses within Auburn city.
                 }
                 this.list.removeAttribute('hidden');
                 this.candidates = candidates;
+                this._selectedAddress = '';
             }
 
             /**
