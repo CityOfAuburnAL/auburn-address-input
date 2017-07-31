@@ -79,7 +79,7 @@ Form Input for addresses within Auburn city.
     <!--<slot name="query">
       <input name="fullAddress" type="search" list="addressCandidates" autocomplete="address-line1" />
     </slot>-->
-    <paper-input id="paperInput" name="[[name]]" label="[[label]]" required="[[required]]" always-float-label="[[alwaysFloatLabel]]" type="search" tabindex="0" on-blur="_handleBlur" on-focus="_handleFocus" on-value-changed="_handleQueryChanged"></paper-input>
+    <paper-input id="paperInput" name="[[name]]" label="[[label]]" required="[[required]]" always-float-label="[[alwaysFloatLabel]]" type="search" tabindex="[[tabindex]]" on-blur="_handleBlur" on-focus="_handleFocus" on-value-changed="_handleQueryChanged"></paper-input>
     <paper-listbox id="paperList" selected="{{_selectedAddress}}" on-focus="_handleFocus" hidden>
         <template is="dom-repeat" items="[[candidates]]">
             <paper-item>[[item.address]]</paper-item>
@@ -101,6 +101,7 @@ Form Input for addresses within Auburn city.
                     return {
                         name: String,
                         label: String,
+                        tabindex: Number,
                         required: Boolean,
                         alwaysFloatLabel: Boolean,
                         _selectedAddress: {
