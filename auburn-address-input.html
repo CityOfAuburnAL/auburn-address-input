@@ -76,8 +76,7 @@ Form Input for addresses within Auburn city.
                 on-response="_easyServiceResponse"
                 debounce-duration="50"></iron-ajax>
     
-    <p>[[_selectedAddress]]</p>
-    <paper-input id="paperInput" name="[[name]]" label="[[label]]" required="[[required]]" always-float-label="[[alwaysFloatLabel]]" type="search" tabindex="[[tabindex]]" on-blur="_handleBlur" on-focus="_handleFocus" on-value-changed="_handleQueryChanged"></paper-input>
+    <paper-input id="paperInput" name="[[name]]" label="[[label]]" value="{{value}}" required="[[required]]" always-float-label="[[alwaysFloatLabel]]" type="search" tabindex="[[tabindex]]" on-blur="_handleBlur" on-focus="_handleFocus" on-value-changed="_handleQueryChanged"></paper-input>
     <paper-listbox id="paperList" selected="{{_selectedAddress}}" on-focus="_handleFocus" hidden>
         <template is="dom-repeat" items="[[candidates]]">
             <paper-item>[[item.address]]</paper-item>
@@ -98,6 +97,11 @@ Form Input for addresses within Auburn city.
                         tabindex: Number,
                         required: Boolean,
                         alwaysFloatLabel: Boolean,
+                        value: {
+                            type: String,
+                            value: () => { return ''; },
+                            notify: true
+                        },
                         _selectedAddress: {
                             type: String,
                             value: () => { return ''; },
