@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../paper-input/paper-input.html">
@@ -14,76 +14,67 @@ Form Input for addresses within Auburn city.
 
 <dom-module id="auburn-address-input">
     <template>
-    <style>
-      :host {
-        display: block;
-      }
-      :host {
-        display: block;
-        font-size: 17px;
-      }
-      [hidden] {
-        display: none !important;
-      }
-      ::slotted(input),
-      input {
-        font-size: 19px;
-        padding: 0.625em;
-        width: 300px;
-      }
-      ::slotted(ul),
-      ul {
-        background: #FAFAFA;
-        box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 1px;
-        color: #333;
-        line-height: 1.6;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        position: absolute;
-        z-index: 89;
-      }
-      li:hover,
-      li[highlighted] {
-        background: #FFF;
-        color: #000
-      }
-      paper-listbox {
-          margin-top: -8px;
-          position: absolute;
-          z-index: 3;
-          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
-                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
-      }
-      paper-item + paper-item {
-          border-color: #cfd8dc;
-          border-style: solid;
-          border-width: 1px 0 0 0;
-      }
-    </style>
+        <style>
+            :host {
+                display: block;
+                font-size: 17px;
+            }
+            [hidden] {
+                display: none !important;
+            }
+            ::slotted(input),
+            input {
+                font-size: 19px;
+                padding: 0.625em;
+                width: 300px;
+            }
+            ::slotted(ul),
+            ul {
+                background: #FAFAFA;
+                box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 1px;
+                color: #333;
+                line-height: 1.6;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                position: absolute;
+                z-index: 89;
+            }
+            li:hover,
+            li[highlighted] {
+                background: #FFF;
+                color: #000
+            }
+            paper-listbox {
+                margin-top: -8px;
+                position: absolute;
+                z-index: 3;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                            0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                            0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            }
+            paper-item + paper-item {
+                border-color: #cfd8dc;
+                border-style: solid;
+                border-width: 1px 0 0 0;
+            }
+        </style>
 
-    <iron-ajax  id="fuzzyService"
-                url="https://gis.auburnalabama.org/public/rest/services/Tools/AddressPointLocator/GeocodeServer/findAddressCandidates"
-                params='{ "f" : "json" }'
-                handle-as="json"
-                on-response="_goodServiceResponse"
-                debounce-duration="50"></iron-ajax>
-    <iron-ajax  id="looseService"
-                url="https://gis.auburnalabama.org/public/rest/services/Main/Search/MapServer/0/query"
-                params='{ "f" : "json" }'
-                handle-as="json"
-                on-response="_easyServiceResponse"
-                debounce-duration="50"></iron-ajax>
-    
-    <paper-input id="paperInput" name="[[name]]" label="[[label]]" value="{{value}}" required="[[required]]" always-float-label="[[alwaysFloatLabel]]" type="search" tabindex="[[tabindex]]" on-blur="_handleBlur" on-focus="_handleFocus" on-value-changed="_handleQueryChanged"></paper-input>
-    <paper-listbox id="paperList" selected="{{_selectedAddress}}" on-focus="_handleFocus" hidden>
-        <template is="dom-repeat" items="[[candidates]]">
-            <paper-item>[[item.address]]</paper-item>
-        </template>
-    </paper-listbox>
+        <iron-ajax id="fuzzyService" url="https://gis.auburnalabama.org/public/rest/services/Tools/AddressPointLocator/GeocodeServer/findAddressCandidates"
+            params='{ "f" : "json" }' handle-as="json" on-response="_goodServiceResponse" debounce-duration="50"></iron-ajax>
+        <iron-ajax id="looseService" url="https://gis.auburnalabama.org/public/rest/services/Main/Search/MapServer/0/query"
+            params='{ "f" : "json" }' handle-as="json" on-response="_easyServiceResponse" debounce-duration="50"></iron-ajax>
 
-  </template>
+        <paper-input id="paperInput" name="[[name]]" label="[[label]]" value="{{value}}" required="[[required]]"
+            always-float-label="[[alwaysFloatLabel]]" type="search" tabindex="[[tabindex]]" on-blur="_handleBlur"
+            on-focus="_handleFocus" on-value-changed="_handleQueryChanged" on-keydown="_handleInputKeydown"></paper-input>
+        <paper-listbox id="paperList" selected="{{_selectedAddress}}" on-focus="_handleFocus" on-keypress="_handleListBoxKeypress" stopKeyboardEventPropagation hidden>
+            <template is="dom-repeat" items="[[candidates]]">
+                <paper-item>[[item.address]]</paper-item>
+            </template>
+        </paper-listbox>
+
+    </template>
 
     <script>
         class AuburnAddressInput extends Polymer.Element {
@@ -91,113 +82,141 @@ Form Input for addresses within Auburn city.
                 return 'auburn-address-input';
             }
             static get properties() {
-                    return {
-                        name: String,
-                        label: String,
-                        tabindex: Number,
-                        required: Boolean,
-                        alwaysFloatLabel: Boolean,
-                        value: {
-                            type: String,
-                            value: () => { return ''; },
-                            notify: true
+                return {
+                    name: String,
+                    label: String,
+                    tabindex: Number,
+                    required: Boolean,
+                    alwaysFloatLabel: Boolean,
+                    value: {
+                        type: String,
+                        value: () => {
+                            return '';
                         },
-                        _selectedAddress: {
-                            type: String,
-                            value: () => { return ''; },
-                            observer: '_handleSelectedChange'
+                        notify: true
+                    },
+                    _selectedAddress: {
+                        type: String,
+                        value: () => {
+                            return '';
                         },
-                        /**
-                         * Sets/Gets the minimum length for the searchTerm before it's sent to the service
-                         */
-                        queryMinLength: {
-                            type: Number,
-                            value: function() {
-                                return 3;
-                            }
-                        },
-                        /**
-                         * Sets/Gets the maximum results to show as address candidates
-                         * Result sets above this maximum will be thrown out - Set to 0 for infinite
-                         */
-                        resultMaxLength: {
-                            type: Number,
-                            value: function() {
-                                return 15;
-                            }
-                        },
-                        /**
-                         * Stores previously queried search term results
-                         * //TODO - replace cache with indexDB
-                         */
-                        cache: {
-                            type: Array,
-                            value: function() {
-                                return [];
-                            }
+                        observer: '_handleSelectedChange'
+                    },
+                    /**
+                     * Sets/Gets the minimum length for the searchTerm before it's sent to the service
+                     */
+                    queryMinLength: {
+                        type: Number,
+                        value: function () {
+                            return 3;
                         }
-                    };
-                }
-                /**
-                 * Fired when element is ready (Polymer specific)
-                 * Stores input variable and attaches keydown listner
-                 */
+                    },
+                    /**
+                     * Sets/Gets the maximum results to show as address candidates
+                     * Result sets above this maximum will be thrown out - Set to 0 for infinite
+                     */
+                    resultMaxLength: {
+                        type: Number,
+                        value: function () {
+                            return 15;
+                        }
+                    },
+                    /**
+                     * Stores previously queried search term results
+                     * //TODO - replace cache with indexDB
+                     */
+                    cache: {
+                        type: Array,
+                        value: function () {
+                            return [];
+                        }
+                    }
+                };
+            }
+            /**
+             * Fired when element is ready (Polymer specific)
+             * Stores input variable and attaches keydown listner
+             */
             ready() {
-                    super.ready();
-                    
-                    Polymer.RenderStatus.afterNextRender(this, function() {
-                        this.input = this.$.paperInput;
-                        this.list = this.$.paperList;
-                    });
-                }
-                _handleQueryChanged(event) {
-                    //check cache
-                    let searchTerm = this.input.value;
-                    let cached = null;
-                    if (cached = this._getCache(searchTerm))
-                        return this._showCandidates(searchTerm, cached);
+                super.ready();
 
-                    //make query
-                    if ((!searchTerm)) {
-                        //|| (this.candidates && this.candidates.includes(searchTerm))) {//that doesn't work because candidates has the full value
-                        return this.closeResults();
-                    }
-                    this.findCandidates(searchTerm);
+                Polymer.RenderStatus.afterNextRender(this, function () {
+                    this.input = this.$.paperInput;
+                    this.list = this.$.paperList;
+                });
+            }
+            _handleQueryChanged(event) {
+                //check cache
+                let searchTerm = this.input.value;
+                let cached = null;
+                if (cached = this._getCache(searchTerm))
+                    return this._showCandidates(searchTerm, cached);
+
+                //make query
+                if ((!searchTerm)) {
+                    //|| (this.candidates && this.candidates.includes(searchTerm))) {//that doesn't work because candidates has the full value
+                    return this.closeResults();
                 }
-                _handleSelectedChange(selected, old) {
-                    if (selected === '' && !old) {
-                        return;
-                    }
-                    this.input.value = this.candidates[selected].address;
+                this.findCandidates(searchTerm);
+            }
+            _handleSelectedChange(selected, old) {
+                if (selected === '' && !old) {
+                    return;
                 }
-                /**
-                 * Handles focusout events from input - debounces for list clicking
-                 * removed on-blur from listbox and it started working... but that doesn't make a lot of sense
-                 */
+
+                if (this.candidates[selected]) {
+                    this.input.value = this.candidates[selected].address.trim();
+                    this.input.focus();
+                }
+                //added this to try to fix it being stuck open
+                this._debounce = window.setTimeout(this.closeResults.bind(this), 250);
+            }
+            /**
+             * Handles focusout events from input - debounces for list clicking
+             * removed on-blur from listbox and it started working... but that doesn't make a lot of sense
+             */
             _handleBlur(event) {
-                    this._debounce = window.setTimeout(this.closeResults.bind(this), 250);
-                }
+                this._debounce = window.setTimeout(this.closeResults.bind(this), 250);
+            }
             _handleFocus(event) {
                 window.clearTimeout(this._debounce);
             }
-                /**
-                 * Makes service request for user entered searchTerm
-                 */
-            findCandidates(searchTerm) {
-                    if (searchTerm.length < this.queryMinLength) return;
-
-                    this.$.looseService.params.where = `Lifecyclestatus='ACTIVE' AND FullAddress LIKE '${searchTerm.replace(/ /gi, '%')}%'`;
-                    this.$.looseService.params.term = searchTerm;
-                    this.$.looseService.generateRequest();
-
-                    this.$.fuzzyService.params['Single Line Input'] = searchTerm;
-                    this.$.fuzzyService.params.term = searchTerm;
-                    this.$.fuzzyService.generateRequest();
+            /**
+             * Keeps the form from being submitted if user hits enter to select from auto-complete (ex: Edge)
+             *  Also, allows manual close with escape (keyCode == 27) DID NOT WORK, removed!
+             */
+            _handleListBoxKeypress(event) {
+                if (event.keyCode == 13) {
+                    event.stopPropagation();
+                    event.preventDefault();
                 }
-                /**
-                 * Shows address candidates
-                 * Expects cadidate object from GIS findAddressCandidates result.candidates
-                 */
+            }
+            _handleInputKeydown(event) {
+                if (event.keyCode == 40 && !this.list.hasAttribute('hidden')) {
+                    this.list.focus();
+                } else if (event.keyCode == 27 && !this.list.hasAttribute('hidden')) {
+                    this.closeResults();
+                }
+            }
+            /**
+             * Makes service request for user entered searchTerm
+             */
+            findCandidates(searchTerm) {
+                if (searchTerm.length < this.queryMinLength) return;
+
+                this.$.looseService.params.where =
+                    `Lifecyclestatus='ACTIVE' AND FullAddress LIKE '${searchTerm.replace(/ /gi, '%')}%'`;
+                this.$.looseService.params.term = searchTerm;
+                this.$.looseService.generateRequest();
+
+                this.$.fuzzyService.params['Single Line Input'] = searchTerm;
+                this.$.fuzzyService.params.term = searchTerm;
+                this.$.fuzzyService.generateRequest();
+            }
+            /**
+             * Shows address candidates
+             * Expects cadidate object from GIS findAddressCandidates result.candidates
+             */
             _showCandidates(term, candidates) {
                 this.currentQuery = term;
                 if (!candidates || (candidates.length == 1 && candidates[0].address == this.input.value.trim())) {
@@ -213,22 +232,22 @@ Form Input for addresses within Auburn city.
              * Disregards responses with no results or result sets above resultMaxLength (if set)
              */
             _goodServiceResponse(event) {
-                    let response = event.detail.response;
-                    if ((!response.candidates || !response.candidates.length) ||
-                        (this.resultMaxLength && this.resultMaxLength < response.candidates.length)) {
-                            //this._setCache(term, []); Not sure how this will work with two services
-                            return;
-                        } 
-                    //attempt to cache
-                    if (event.target.params) {
-                        this._setCache(event.target.params.term, response.candidates);
-                        this._showCandidates(event.target.params.term, response.candidates);
-                    }
+                let response = event.detail.response;
+                if ((!response.candidates || !response.candidates.length) ||
+                    (this.resultMaxLength && this.resultMaxLength < response.candidates.length)) {
+                    //this._setCache(term, []); Not sure how this will work with two services
+                    return;
                 }
-                /**
-                 * Handles result from GIS service called to findAddressCandidates
-                 * Disregards responses with no results or result sets above resultMaxLength (if set)
-                 */
+                //attempt to cache
+                if (event.target.params) {
+                    this._setCache(event.target.params.term, response.candidates);
+                    this._showCandidates(event.target.params.term, response.candidates);
+                }
+            }
+            /**
+             * Handles result from GIS service called to findAddressCandidates
+             * Disregards responses with no results or result sets above resultMaxLength (if set)
+             */
             _easyServiceResponse(event) {
                 let response = event.detail.response;
                 if ((!response.features || !response.features.length) ||
