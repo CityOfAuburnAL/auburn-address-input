@@ -65,7 +65,7 @@ Form Input for addresses within Auburn city.
         <iron-ajax id="looseService" url="https://gis.auburnalabama.org/public/rest/services/Main/Search/MapServer/0/query"
             params='{ "f" : "json" }' handle-as="json" on-response="_easyServiceResponse" debounce-duration="50"></iron-ajax>
 
-        <paper-input id="paperInput" name="[[name]]" label="[[label]]" value="{{value}}" required="[[required]]"
+        <paper-input id="paperInput" name="[[name]]" label="[[label]]" value="{{value}}" required="[[required]]" autofocus="[[autofocus]]"
             always-float-label="[[alwaysFloatLabel]]" type="search" tabindex="[[tabindex]]" on-blur="_handleBlur"
             on-focus="_handleFocus" on-value-changed="_handleQueryChanged" on-keydown="_handleInputKeydown"></paper-input>
         <paper-listbox id="paperList" selected="{{_selectedAddress}}" on-focus="_handleFocus" on-keypress="_handleListBoxKeypress" stopKeyboardEventPropagation hidden>
@@ -77,6 +77,7 @@ Form Input for addresses within Auburn city.
     </template>
 
     <script>
+        //BUG: Autofocus doesn't work
         class AuburnAddressInput extends Polymer.Element {
             static get is() {
                 return 'auburn-address-input';
@@ -169,14 +170,14 @@ Form Input for addresses within Auburn city.
                     this.input.focus();
                 }
                 //added this to try to fix it being stuck open
-                this._debounce = window.setTimeout(this.closeResults.bind(this), 250);
+                this._debounce = window.setTimeout(this.closeResults.bind(this), 150);
             }
             /**
              * Handles focusout events from input - debounces for list clicking
              * removed on-blur from listbox and it started working... but that doesn't make a lot of sense
              */
             _handleBlur(event) {
-                this._debounce = window.setTimeout(this.closeResults.bind(this), 250);
+                this._debounce = window.setTimeout(this.closeResults.bind(this), 150);
             }
             _handleFocus(event) {
                 window.clearTimeout(this._debounce);
