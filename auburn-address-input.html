@@ -60,7 +60,7 @@ Form Input for addresses within Auburn city.
             }
         </style>
 
-        <iron-ajax id="fuzzyService" url="https://gis.auburnalabama.org/public/rest/services/Tools/AddressPointLocator/GeocodeServer/findAddressCandidates"
+        <iron-ajax id="fuzzyService" url="https://gis.auburnalabama.org/public/rest/services/Tools/AuburnAddressLocator/GeocodeServer/findAddressCandidates"
             params='{ "f" : "json" }' handle-as="json" on-response="_goodServiceResponse" debounce-duration="50"></iron-ajax>
         <iron-ajax id="looseService" url="https://gis.auburnalabama.org/public/rest/services/Main/Search/MapServer/0/query"
             params='{ "f" : "json" }' handle-as="json" on-response="_easyServiceResponse" debounce-duration="50"></iron-ajax>
